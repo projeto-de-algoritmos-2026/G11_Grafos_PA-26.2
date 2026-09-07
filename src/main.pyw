@@ -361,9 +361,12 @@ def lift(first=False):
 
         events = pygame.event.get()
         for event in events:
-            if event.type == QUIT:
-                pygame.quit()
-                quit()
+            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                try:
+                    pygame.mixer.music.stop()
+                    pygame.quit()
+                finally:
+                    os._exit(0)
             elif event.type == MOUSEBUTTONDOWN and event.button == 3 and state == 2:
                 running = False
 
@@ -607,9 +610,12 @@ lift(True)
 while True:
     events = pygame.event.get()
     for event in events:
-        if event.type == QUIT:
-            pygame.quit()
-            quit()
+        if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+            try:
+                pygame.mixer.music.stop()
+                pygame.quit()
+            finally:
+                os._exit(0)
         elif event.type == MOUSEBUTTONDOWN:
             pygame.event.set_grab(1) # refresh mouse grab
         elif event.type == USEREVENT: # exit door opened
