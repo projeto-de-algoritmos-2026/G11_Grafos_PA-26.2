@@ -69,17 +69,21 @@ def heapfy(heap, i):
             return heapfy(heap, filhoD)
     
 
-def inserirHeap(heap, celula):
+def inserirHeap(heap, celula, custo):
     ultimo = heap[0]
-    heap.append(celula)
+    heap.append((custo, celula))
     heap[0] = ultimo + 1 # poderia ser ++ tambem
     shiftup(heap, ultimo)
 
 def removerHeap(heap):
     if len(heap) > 1:
+        swap(heap, heap[0] - 1, 1)
         valor = heap.pop()
+        heap[0] -= 1
+        heapfy(heap, 1)
         return valor
-    
+
+
 def a_star(maze, start, goal):
 
     # verifica se já está em goal
@@ -100,10 +104,45 @@ def a_star(maze, start, goal):
 
     h = criarHeap()
 
-    vizinhos = get_neighbors(maze, start)
-    for v in vizinhos:
-        inserirHeap(v)
-    
-    
-#TODO: finalizar implementação do algoritmo A estrela
+    veio_por = {}
+    g_score = {start: 0}
+    visitados = set()
 
+    inserirHeap(h, start, heuristic(start, goal))
+
+    while h[0] > 1:
+        custo, atual = removerHeap(h)
+
+        if atual in visitados:
+            continue
+
+        visitados.add(atual)
+
+        #vê se chegou ao objetivo
+        if atual == goal:
+            caminho = [atual]
+
+            while atual in veio_por:
+                atual = veio_por[atual]
+                caminho.append(atual)
+
+            caminho.reverse()
+            return caminho
+
+        vizinhos = get_neighbors(maze, atual)
+
+        for celulav in vizinhos:
+            if celulav in visitados:
+                continue
+
+            novo_custo = g_score[atual] + 1 # custo de cada célula é 1
+
+            if novo_custo < g_score.get(celulav, float('inf')):
+                veio_por[celulav] = atual
+                g_score[celulav] = novo_custo
+
+                f = novo_custo + heuristic(celulav, goal)
+
+                inserirHeap(h, celulav, f)
+    return []
+    
