@@ -262,6 +262,7 @@ class Monster(Entity):
 
         self.reaction = 700
         self.track_dist = 14
+        self.shoot_dist = 4  #para ele não atirar de tão longe
         self.start_see = 0 # when
         self.last_see = None # where (vector)
         self.walk_goal = None # where to wander around: either None or [pos, when]
@@ -280,16 +281,26 @@ class Monster(Entity):
         m, n = len(maze[0]), len(maze)
         start = Vector2(self.pos.x, self.pos.z)
         move = Vector2(pos.x, pos.z)-start
+        dist = move.length()
 
-        if move.length() > self.track_dist:
+        if dist > self.track_dist:
             return False
 
-        steps = max(int(move.length() * 3), 10)
-        for i in range(steps):
+        steps = max(int(dist * 5), 15)
+        margin = 0.2 # margem para evitar mirar ou atirar atraves de quinas
+        for i in range(1, steps):
             p = start + move*i/steps
             x, y = floor(p.x), floor(p.y)
             if 0 <= x < m and 0 <= y < n and maze[y][x] > 0:
                 return False
+
+            dist_from_start = dist * (i / steps)
+            dist_to_target = dist - dist_from_start
+            if dist_from_start > 0.3 and dist_to_target > 0.3:
+                for dx, dy in ((-margin, 0), (margin, 0), (0, -margin), (0, margin)):
+                    nx, ny = floor(p.x + dx), floor(p.y + dy)
+                    if 0 <= nx < m and 0 <= ny < n and maze[ny][nx] > 0:
+                        return False
         return True
 
     def aim_at(self, pos):
@@ -369,13 +380,21 @@ class Monster(Entity):
                 # aim at the player
                 self.aim_at(player.pos)
 
-                if 1 <= dist_to_player <= 3:
-                    # move towards the player if reasonable distance
-                    self.movement = (player.pos-self.pos).normalize()
+                if dist_to_player > self.shoot_dist:
+                    move_dir = player.pos - self.pos
+                    move_dir.y = 0
+                    if move_dir.length() > 0:
+                        self.movement = move_dir.normalize()
                 elif ticks()-self.last_shot >= self.weapon_delay:
-                    # start to shoot if near or too far
+                    # Dentro do alcance de tiro e pronto para disparar
                     self.type_ = 1
                     self.texupdate = ticks()+250
+                elif dist_to_player > 1.2:
+                    # Enquanto a arma recarrega, continua se aproximando
+                    move_dir = player.pos - self.pos
+                    move_dir.y = 0
+                    if move_dir.length() > 0:
+                        self.movement = move_dir.normalize()
 
                 self.last_see = Vector3(player.pos)
                 self.walk_goal = None
