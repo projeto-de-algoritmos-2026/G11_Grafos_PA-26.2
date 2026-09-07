@@ -16,6 +16,10 @@ Inspirado na franquia de jogos [Doom](https://pt.wikipedia.org/wiki/Doom_(série
 O projeto "Doom Epic Maze A Star Upgrade" é um incremento ao jogo Doom Epic Maze de [d-002](https://github.com/d-002) aplicando um algoritmo (A*) de perseguição aos inimigos do jogo. Assim, mesmo que você fuja ou se esconda os personagens irão te perseguir dentro do labirinto até te encontrar! <br><br>
 [Link do repositório original](https://github.com/d-002/maze).
 
+## Video
+Gravação da apresentação do projeto:
+[Link do Video]().
+<br><br>
 
 ## Screenshots
 <p align="center">
