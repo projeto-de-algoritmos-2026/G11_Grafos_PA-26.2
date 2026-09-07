@@ -7,6 +7,7 @@ from random import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from pygame.locals import *
+from a_star import a_star
 
 def send_tex(tex): # at the very start
     global textures
@@ -260,10 +261,15 @@ class Monster(Entity):
         self.channels = [pygame.mixer.Channel(x) for x in (2, 3)] # all monsters share the same
 
         self.reaction = 700
-        self.track_dist = 4
+        self.track_dist = 14
         self.start_see = 0 # when
         self.last_see = None # where (vector)
         self.walk_goal = None # where to wander around: either None or [pos, when]
+
+        # A* pathfinding
+        self.path = []
+        self.last_path_calc = 0
+        self.path_calc_interval = 300
 
         self.texupdate = 0 # when to update the texture
         self.walk = 0 # walk animation index
@@ -278,9 +284,10 @@ class Monster(Entity):
         if move.length() > self.track_dist:
             return False
 
-        for i in range(10):
-            pos = start + move*i/10
-            x, y = floor(pos.x), floor(pos.y)
+        steps = max(int(move.length() * 3), 10)
+        for i in range(steps):
+            p = start + move*i/steps
+            x, y = floor(p.x), floor(p.y)
             if 0 <= x < m and 0 <= y < n and maze[y][x] > 0:
                 return False
         return True
@@ -338,16 +345,23 @@ class Monster(Entity):
 
         self.movement = Vector3()
 
-        if self.accessible(player.pos) and not player.dying: # if can see/track the player
+        dist_to_player = self.pos.distance_to(player.pos)
+        has_line_of_sight = self.accessible(player.pos) and not player.dying
 
-            if self.last_see is None: # not aggroed: needs to be in FOV range
+        # Perde o rastro se o jogador morrer ou se afastar demais
+        if player.dying or dist_to_player > self.track_dist:
+            if self.last_see is not None:
+                self.last_see = None
+                self.path = []
+
+        if has_line_of_sight:
+            if self.last_see is None: # not aggroed: needs to be in FOV range or close sound
                 see_angle = atan2(self.pos.z-player.pos.z, player.pos.x-self.pos.x)
-                in_fov = abs(see_angle - self.rot.y - pi/2) <= pi/3
+                in_fov = abs(see_angle - self.rot.y - pi/2) <= pi/3 or dist_to_player <= 2.5
 
                 if in_fov: # just got aggroed
-                    self.last_see = Vector3() # dummy position, needs to not be None
+                    self.last_see = Vector3(player.pos)
                     self.channels[1].play(self.sounds['notice'])
-
             else: # don't need to check for FOV range once aggroed
                 in_fov = True
 
@@ -355,7 +369,7 @@ class Monster(Entity):
                 # aim at the player
                 self.aim_at(player.pos)
 
-                if 1 <= self.pos.distance_to(player.pos) <= 3:
+                if 1 <= dist_to_player <= 3:
                     # move towards the player if reasonable distance
                     self.movement = (player.pos-self.pos).normalize()
                 elif ticks()-self.last_shot >= self.weapon_delay:
@@ -365,10 +379,50 @@ class Monster(Entity):
 
                 self.last_see = Vector3(player.pos)
                 self.walk_goal = None
+                self.path = []
         else:
             self.start_see = ticks()
 
-            if self.last_see is None: # wander around
+            if self.last_see is not None and not player.dying and dist_to_player <= self.track_dist:
+                # Persegue o jogador pelo labirinto usando A*
+                now = ticks()
+                if now - self.last_path_calc >= self.path_calc_interval:
+                    self.last_path_calc = now
+                    start_node = (floor(self.pos.x), floor(self.pos.z))
+                    goal_node = (floor(player.pos.x), floor(player.pos.z))
+                    calc_path = a_star(maze, start_node, goal_node)
+                    if len(calc_path) > 1 and calc_path[0] == start_node:
+                        self.path = calc_path[1:]
+                    else:
+                        self.path = calc_path
+
+                if self.path:
+                    target_node = self.path[0]
+                    target_pos = Vector3(target_node[0] + 0.5, 0, target_node[1] + 0.5)
+
+                    dx = self.pos.x - target_pos.x
+                    dz = self.pos.z - target_pos.z
+                    if dx*dx + dz*dz < 0.09: # chegou perto do centro da celula
+                        self.path.pop(0)
+                        if self.path:
+                            target_node = self.path[0]
+                            target_pos = Vector3(target_node[0] + 0.5, 0, target_node[1] + 0.5)
+
+                    direction = target_pos - self.pos
+                    direction.y = 0
+                    if direction.length() > 0:
+                        self.movement = direction.normalize()
+                        self.aim_at(target_pos)
+                else:
+                    if self.pos.distance_to(self.last_see) < 0.3:
+                        self.last_see = None
+                    else:
+                        self.movement = (self.last_see-self.pos).normalize()
+                        self.movement.y = 0
+                        self.aim_at(self.last_see)
+
+            elif self.last_see is None: # wander around
+                self.path = []
                 if self.walk_goal is None: # set a new goal
                     m, n = len(maze[0]), len(maze)
                     ok = [] # where it could go
@@ -393,18 +447,14 @@ class Monster(Entity):
                         self.movement = (self.walk_goal[0]-self.pos).normalize()
                         self.movement.y = 0
                         self.aim_at(self.walk_goal[0])
-
-            else: # try to go to the last known position
-                if self.pos.distance_to(self.last_see) < 0.2:
-                    self.last_see = None
-                else:
-                    self.movement = (self.last_see-self.pos).normalize()
-                    self.movement.y = 0
+            else:
+                self.last_see = None
+                self.path = []
 
         self.pos += self.movement*time_passed*self.speed
         collide = self.collide()
         if type(collide) != bool and collide != player: # entity is blocking it
-            self.last_see = None # stop chasing
+            self.path = [] # recalcula rota ao bater em outra entidade
 
     def render(self):
         # get the "side" of the entity that is seen by the camera

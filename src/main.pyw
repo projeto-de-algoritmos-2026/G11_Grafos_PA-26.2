@@ -621,7 +621,7 @@ while True:
     for entity in entities:
         if entity == player:
             player.update(events, time_passed)
-        elif entity.pos.distance_to(player.pos) <= 8: # simulation distance
+        elif entity.pos.distance_to(player.pos) <= 14: # simulation distance
             entity.update(time_passed)
     for particle in particles:
         particle.update(time_passed)
