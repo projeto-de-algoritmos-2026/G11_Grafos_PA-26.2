@@ -350,6 +350,7 @@ def lift(first=False):
                 if first:
                     # if first level, start the music
                     pygame.mixer.music.play(-1)
+                    pygame.mixer.music.set_volume(0.08)
                     start = ticks() # prevent lag when playing music
             state = 1 # descending
             alpha = min(start+delay-ticks(), 1000)/1000
@@ -576,8 +577,10 @@ ticks = pygame.time.get_ticks
 
 # music
 pygame.mixer.music.load('files/sfx/music.mp3')
-pygame.mixer.music.set_volume(0.5)
+pygame.mixer.music.set_volume(0.08)
 lifton, liftoff, door, bullet = [pygame.mixer.Sound('files/sfx/%s.wav' %name) for name in ['lifton', 'liftoff', 'door', 'bullet']]
+for s in [lifton, liftoff, door, bullet]:
+    s.set_volume(0.08)
 
 door_trigger = None # used for door animations
 doors = None # start and exit doors: [pos, normal x]

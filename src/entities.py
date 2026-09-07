@@ -140,9 +140,11 @@ class Player(Entity):
 
         self.sounds = {name: pygame.mixer.Sound('files/sfx/%s.wav' %name) for name in ['hit', 'death']}
         self.sounds['shot'] = pygame.mixer.Sound('files/sfx/shotgun.wav')
+        for s in self.sounds.values():
+            s.set_volume(0.08)
         self.channels = [pygame.mixer.Channel(x) for x in (0, 1)] # weapon, body
         for c in self.channels:
-            c.set_volume(0.7)
+            c.set_volume(0.08)
 
     def move(self, events, time_passed):
         # rotation
@@ -258,7 +260,11 @@ class Monster(Entity):
 
         self.sounds = {name: pygame.mixer.Sound('files/sfx/monsters/%s.wav' %name) for name in ['notice', 'death']}
         self.sounds['shot'] = pygame.mixer.Sound('files/sfx/pistol.wav')
+        for s in self.sounds.values():
+            s.set_volume(0.08)
         self.channels = [pygame.mixer.Channel(x) for x in (2, 3)] # all monsters share the same
+        for c in self.channels:
+            c.set_volume(0.08)
 
         self.reaction = 700
         self.track_dist = 14
