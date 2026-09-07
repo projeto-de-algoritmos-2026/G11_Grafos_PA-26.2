@@ -12,8 +12,8 @@ Conteúdo da Disciplina: algoritmo A*, grafos, heap. <br>
 | Guilherme Davila Rodrigues Carneiro Sampaio | 221029220 | 
 
 ## Sobre
-Inspirado na franquia de jogos [Doom](https://pt.wikipedia.org/wiki/Doom_(série_de_jogos)) o jogo [Doom Epic Maze](https://github.com/d-002/maze) é um python game onde você tenta achar o portão de saída do labirinto e ir para o próximo nível, onde um labirinto maior ainda gerado de forma procedural estará esperando por você. Tome cuidado com os monstros no caminho que tentarão te impedir de chegar no final! <br>
-O projeto "Doom Epic Maze A Star Upgrade" é um incremento ao jogo Doom Epic Maze de [d-002](https://github.com/d-002) aplicando um algoritmo (A*) de perseguição aos inimigos do jogo. Assim, mesmo que você fuja ou se esconda os personagens irão te perseguir dentro do labirinto até te encontrar! <br> 
+Inspirado na franquia de jogos [Doom](https://pt.wikipedia.org/wiki/Doom_(série_de_jogos)) o jogo [Doom Epic Maze](https://github.com/d-002/maze) é um python game onde você tenta achar o portão de saída do labirinto e ir para o próximo nível, onde um labirinto maior ainda gerado de forma procedural estará esperando por você. Tome cuidado com os monstros no caminho que tentarão te impedir de chegar no final! <br><br>
+O projeto "Doom Epic Maze A Star Upgrade" é um incremento ao jogo Doom Epic Maze de [d-002](https://github.com/d-002) aplicando um algoritmo (A*) de perseguição aos inimigos do jogo. Assim, mesmo que você fuja ou se esconda os personagens irão te perseguir dentro do labirinto até te encontrar! <br><br>
 [Link do repositório original](https://github.com/d-002/maze).
 
 
