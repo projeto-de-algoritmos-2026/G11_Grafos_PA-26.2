@@ -17,8 +17,8 @@ O projeto "Doom Epic Maze A Star Upgrade" é um incremento ao jogo Doom Epic Maz
 [Link do repositório original](https://github.com/d-002/maze).
 
 ## Video
-Gravação da apresentação do projeto:
-[Link do Video]().
+Gravação da apresentação do projeto:<br>
+[Link do Video](https://youtu.be/gQlJT5Wo42E).
 <br><br>
 
 ## Screenshots
