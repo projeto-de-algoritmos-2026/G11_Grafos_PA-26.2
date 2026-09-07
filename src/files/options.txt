@@ -1,0 +1,5 @@
+move_keys = wasd
+fov = 70
+render_distance = 20
+fullscreen = True
+discord = True
