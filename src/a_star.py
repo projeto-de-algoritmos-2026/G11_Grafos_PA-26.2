@@ -95,7 +95,7 @@ def a_star(maze, start, goal):
     # c colunas
     c = len(maze[0])
 
-    # gaol 
+    # goal 
     gx, gy = goal
 
     # vê se está dentro do labirinto ou é parede
