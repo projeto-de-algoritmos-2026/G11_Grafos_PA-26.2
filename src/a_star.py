@@ -75,6 +75,11 @@ def inserirHeap(heap, celula):
     heap[0] = ultimo + 1 # poderia ser ++ tambem
     shiftup(heap, ultimo)
 
+def removerHeap(heap):
+    if len(heap) > 1:
+        valor = heap.pop()
+        return valor
+    
 def a_star(maze, start, goal):
 
     # verifica se já está em goal
@@ -93,7 +98,12 @@ def a_star(maze, start, goal):
     if not (0 <= gx < c and 0 <= gy < l) or maze[gy][gx] > 0:
         return []
 
+    h = criarHeap()
 
+    vizinhos = get_neighbors(maze, start)
+    for v in vizinhos:
+        inserirHeap(v)
+    
     
 #TODO: finalizar implementação do algoritmo A estrela
 
